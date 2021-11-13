@@ -43,50 +43,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<Transaction> _transactions = [
-    Transaction(
-      id: 't0',
-      title: 'Novo Tênis Adidas',
-      value: 310.45,
-      date: DateTime.now().subtract(Duration(days: 33)),
-    ),
-    Transaction(
-      id: 't1',
-      title: 'Novo Tênis Olimpikus',
-      value: 310.45,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: 't2',
-      title: 'Novo Tênis Nike',
-      value: 310.45,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: 't1',
-      title: 'Novo Tênis Olimpikus',
-      value: 310.45,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: 't2',
-      title: 'Novo Tênis Nike',
-      value: 310.45,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: 't1',
-      title: 'Novo Tênis Olimpikus',
-      value: 310.45,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: 't2',
-      title: 'Novo Tênis Nike',
-      value: 310.45,
-      date: DateTime.now(),
-    ),
-  ];
+  final List<Transaction> _transactions = [];
 
   List<Transaction> get _recentTransactions {
     // 'where' é igual ao Filter do Javascript.
@@ -95,12 +52,12 @@ class _MyHomePageState extends State<MyHomePage> {
     }).toList();
   }
 
-  _addTransaction(String title, double value) {
+  _addTransaction(String title, double value, DateTime date) {
     final newTransaction = Transaction(
       id: Random().nextDouble().toString(),
       title: title,
       value: value,
-      date: DateTime.now().subtract(Duration(days: 4)),
+      date: date,
     );
 
     setState(() {
@@ -108,6 +65,12 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     Navigator.of(context).pop();
+  }
+
+  _removeTransaction(String id) {
+    setState(() {
+      _transactions.removeWhere((tr) => tr.id == id);
+    });
   }
 
   _openTransactionFormModal(BuildContext context) {
@@ -121,24 +84,39 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Despesas Pessoais',
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () => _openTransactionFormModal(context),
-          ),
-        ],
+    final appBar = AppBar(
+      title: Text(
+        'Despesas Pessoais',
       ),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.add),
+          onPressed: () => _openTransactionFormModal(context),
+        ),
+      ],
+    );
+
+    final availableHeight = MediaQuery.of(context).size.height -
+        appBar.preferredSize.height -
+        MediaQuery.of(context).padding.top;
+
+    return Scaffold(
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Chart(_recentTransactions),
-            TransactionList(transactions: _transactions),
+            Container(
+              height: availableHeight * 0.4,
+              child: Chart(_recentTransactions),
+            ),
+            Container(
+              height: availableHeight * 0.6,
+              child: TransactionList(
+                transactions: _transactions,
+                onRemove: _removeTransaction,
+              ),
+            ),
           ],
         ),
       ),
